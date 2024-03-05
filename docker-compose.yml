@@ -1,27 +1,27 @@
 version: '3.8'
 
 services:
-  receiverservice:
+  imagereceiver:
     build:
-      context: ./receiver
+      context: ./imagereceiver
       dockerfile: /Dockerfile
     volumes:
-      - ./receiver:/app
-    depends_on:
-      - rabbitmqservice
-  senderservice:
-    build:
-      context: ./sender
-      dockerfile: /Dockerfile
-    volumes:
-      - ./sender:/app
-    depends_on:
-      - rabbitmqservice
-  rabbitmqservice:
-    image: rabbitmq:3-management
+      - ./imagereceiver:/app
+      - ./data/images:/app/images
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "4000:4000"
+    depends_on:
+      - postgres
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      - DATABASE_URL=postgres://admin:password@postgres:5432/photoprestige
+      - PORT=4000
+  postgres:
+    image: postgres:16
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: photoprestige
