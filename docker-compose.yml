@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  receiverservice:
+    build:
+      context: ./receiver
+      dockerfile: /Dockerfile
+    volumes:
+      - ./receiver:/app
+    depends_on:
+      - rabbitmqservice
+  senderservice:
+    build:
+      context: ./sender
+      dockerfile: /Dockerfile
+    volumes:
+      - ./sender:/app
+    depends_on:
+      - rabbitmqservice
+  rabbitmqservice:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
