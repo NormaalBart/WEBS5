@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  imagereceiver:
+  imageservice:
     build:
-      context: ./imagereceiver
+      context: ./imageservice
       dockerfile: /Dockerfile
     volumes:
-      - ./imagereceiver:/app
+      - ./imageservice:/app
       - ./data/images:/app/images
     ports:
       - "4000:4000"
@@ -25,3 +25,23 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
       POSTGRES_DB: photoprestige
+  mailhog:
+    image: mailhog/mailhog
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: /home/mailhog
+    volumes:
+      - ./data/mailhog:/home/mailhog
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web interface
+  rabbitmq:
+    image: "rabbitmq:3.13-management"
+    volumes:
+      - "./data/rabbitmq:/var/lib/rabbitmq"
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # Web management interface
+    environment:
+      RABBITMQ_DEFAULT_USER: "user"
+      RABBITMQ_DEFAULT_PASS: "password"
