@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  apigateway:
+    build:
+      context: ./apigateway
+      dockerfile: /Dockerfile
+    volumes:
+      - ./apigateway:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - "IMAGE_SERVICE=https://imageservice:4000/"
+    restart: always
   imageservice:
     build:
       context: ./imageservice
@@ -8,13 +19,12 @@ services:
     volumes:
       - ./imageservice:/app
       - ./data/images:/app/images
-    ports:
-      - "4000:4000"
     depends_on:
       - postgres
     environment:
       - DATABASE_URL=postgres://admin:password@postgres:5432/photoprestige
       - PORT=4000
+    restart: always
   postgres:
     image: postgres:16
     volumes:
@@ -25,6 +35,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
       POSTGRES_DB: photoprestige
+    restart: always
   mailhog:
     image: mailhog/mailhog
     environment:
@@ -35,6 +46,7 @@ services:
     ports:
       - "1025:1025" # SMTP server
       - "8025:8025" # Web interface
+    restart: always
   rabbitmq:
     image: "rabbitmq:3.13-management"
     volumes:
@@ -45,3 +57,4 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: "user"
       RABBITMQ_DEFAULT_PASS: "password"
+    restart: always
