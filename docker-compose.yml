@@ -10,7 +10,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - "IMAGE_SERVICE=https://imageservice:4000/"
+      - "IMAGE_SERVICE=http://imageservice:5672/"
     restart: always
   imageservice:
     build:
@@ -23,7 +23,7 @@ services:
       - postgres
     environment:
       - DATABASE_URL=postgres://admin:password@postgres:5432/photoprestige
-      - PORT=4000
+      - PORT=5672
     restart: always
   postgres:
     image: postgres:16

@@ -10,7 +10,5 @@ COPY . .
 # Voer npm install uit
 RUN npm install
 
-EXPOSE 5672
-
 # Gebruik npm start als startcommando
-CMD node receiver.js
+CMD npm run dev

@@ -15,12 +15,16 @@ export function createRouteWithCircuitBreaker (app, path, router) {
   )
 
   app.use(path, (req, res) => {
-    breaker.fire(req, res).catch(error => {
-      // TODO: Logging file?
-      console.error(error)
-      if (!res.headersSent) {
-        res.status(503).send('Service Unavailable')
-      }
-    })
+    breaker
+      .fire(req, res)
+      .then(res => {})
+      .catch(error => {
+        console.log(error)
+        // TODO: Logging file?
+        console.log('Er is iets fout gegaan!')
+        if (!res.headersSent) {
+          res.status(503).send('Service Unavailable')
+        }
+      })
   })
 }
