@@ -6,11 +6,6 @@ const port = process.env.PORT || 3000
 // Middleware om JSON body te parseren
 app.use(express.json())
 
-app.get('/', (req, res) => {
-  res.send('receivedfdsafdsajfdsjklfdskjlfdsjklad')
-})
-
-
 app.post('/upload', (req, res) => {
   res.send('POST-verzoek ontvangen!')
 })

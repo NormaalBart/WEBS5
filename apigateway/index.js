@@ -1,5 +1,4 @@
 import express from 'express'
-import { createRouteWithCircuitBreaker } from './util/register.js'
 import imageServiceRouter from './routes/imageservicerouter.js'
 
 const app = express()
@@ -10,7 +9,7 @@ app.use((req, res, next) => {
   next()
 })
 
-createRouteWithCircuitBreaker(app, '/images', imageServiceRouter)
+app.use('/images', imageServiceRouter)
 
 app.listen(port, () => {
   console.log(`API Gateway luistert op poort ${port}`)
