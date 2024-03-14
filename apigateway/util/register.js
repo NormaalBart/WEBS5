@@ -1,6 +1,12 @@
 import CircuitBreaker from 'opossum'
 
 export function createRouteWithCircuitBreaker (app, path, router) {
+  // Default not 404 not found.
+  router.use((req, res, next) => {
+    res.status(404).send('Not Found')
+    next()
+  })
+
   const breaker = new CircuitBreaker(
     (req, res) =>
       new Promise((resolve, reject) => {
