@@ -14,25 +14,23 @@ class Breaker {
         errorThresholdPercentage: 50,
         resetTimeout: 5000
       }
-      const breaker = new CircuitBreaker(async (action, url, config) => {
+      const breaker = new CircuitBreaker(async (action, url, data) => {
         try {
-          // Probeer het Axios verzoek uit te voeren
-          const response = await axios[action](url, config);
-          return response;
+          const response = await axios[action](url, data)
+          return response
         } catch (error) {
-          // Controleer of de foutstatus 503 of 504 is
-          if (error.response && (error.response.status === 503 || error.response.status === 504)) {
-            // Voor 503 en 504, gooi de fout zodat de breaker kan 'breken'
-            throw error;
+          if (
+            error.response &&
+            (error.response.status === 503 || error.response.status === 504)
+          ) {
+            throw error
           }
-          // Voor alle andere fouten, return een aangepaste foutresponse
-          // Dit zorgt ervoor dat de breaker niet 'breekt' voor deze fouten
           return {
             status: error.response ? error.response.status : 500,
-            data: error.response ? error.response.data : 'Unknown error',
-          };
+            data: error.response ? error.response.data : 'Unknown error'
+          }
         }
-      }, options);
+      }, options)
 
       this.breakers.set(key, breaker)
       return breaker
@@ -41,27 +39,26 @@ class Breaker {
     return this.breakers.get(key)
   }
 
-  async get (url, req, res, config = {}) {
+  async get (url, req, res) {
     const breaker = this.getBreaker(url)
     return breaker
-      .fire('get', url, config)
+      .fire('get', url, req.body)
       .then(result => {
-        res.send(result.data)
+        res.status(result.status).send(result.data)
       })
       .catch(err => {
         res.status(503).send('Service unavailable')
       })
   }
 
-  async post (url, req, res, data = {}, config = {}) {
+  async post (url, req, res) {
     const breaker = this.getBreaker(url)
     return breaker
-      .fire('post', url, { ...config, data })
+      .fire('post', url, req.body)
       .then(result => {
-        res.send(result.data)
+        res.status(result.status).send(result.data)
       })
       .catch(err => {
-        console.log(err)
         res.status(503).send('Service unavailable')
       })
   }

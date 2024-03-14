@@ -22,18 +22,19 @@ services:
     depends_on:
       - postgres
     environment:
-      - DATABASE_URL=postgres://admin:password@postgres:5432/photoprestige
+      - DATABASE_URL=postgres://admin:ohzomoeilijkwachtwoord@postgres:5432/photoprestige
       - PORT=5672
     restart: always
   postgres:
     image: postgres:16
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+      - ./imageservicedb/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ohzomoeilijkwachtwoord
       POSTGRES_DB: photoprestige
     restart: always
   mailhog:
