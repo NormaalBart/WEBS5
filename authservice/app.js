@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 const app = express()
 const db = new Database()
 
-app.use(express.json()) // Voor het parsen van JSON request bodies
+app.use(express.json())
 
 app.post('/register', async (req, res) => {
   if (!req.body.username || req.body.password) {

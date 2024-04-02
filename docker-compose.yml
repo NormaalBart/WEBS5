@@ -21,9 +21,9 @@ services:
       - ./imageservice:/app
       - ./data/images:/app/images
     depends_on:
-      - postgres
+      - imageservicedb
     environment:
-      - DATABASE_URL=postgres://admin:ohzomoeilijkwachtwoord@postgres:5432/photoprestige
+      - DATABASE_URL=postgres://admin:ohzomoeilijkwachtwoord@imageservicedb:5432/photoprestige
       - PORT=5672
     restart: always
   authservice:
@@ -33,18 +33,26 @@ services:
     volumes:
       - ./authservice:/app
     depends_on:
-      - postgres
+      - imageservicedb
     environment:
-      - DATABASE_URL=postgres://admin:ohzomoeilijkwachtwoord@postgres:5432/photoprestige
+      - DATABASE_URL=postgres://admin:ohzomoeilijkwachtwoord@imageservicedb:5432/photoprestige
       - PORT=5672
     restart: always
-  postgres:
+  imageservicedb:
     image: postgres:16
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-      - ./imageservicedb/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    ports:
-      - "5432:5432"
+      - ./data/imageservice:/var/lib/postgresql/data
+      - ./databasescripts/imageservice.sql:/docker-entrypoint-initdb.d/init-db.sql
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ohzomoeilijkwachtwoord
+      POSTGRES_DB: photoprestige
+    restart: always
+  authservicedb:
+    image: postgres:16
+    volumes:
+      - ./data/authservice:/var/lib/postgresql/data
+      - ./databasescripts/authservice.sql:/docker-entrypoint-initdb.d/init-db.sql
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: ohzomoeilijkwachtwoord
