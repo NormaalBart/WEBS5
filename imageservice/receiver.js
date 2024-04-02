@@ -12,7 +12,7 @@ const upload = multer({ storage })
 
 const db = new Database()
 
-app.post('/upload', upload.single('image'), async (req, res) => {
+app.post('/', upload.single('image'), async (req, res) => {
   const file = req.file
   if (!file) {
     return res.status(400).send('Geen afbeelding gevonden in de request.')
@@ -34,7 +34,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
   }
 })
 
-app.get('/image/:id', async (req, res) => {
+app.get('/:id', async (req, res) => {
   const imageId = req.params.id
 
   try {

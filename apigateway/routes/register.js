@@ -1,8 +1,9 @@
-import { createProxyMiddleware } from 'http-proxy-middleware'
+import proxy from 'express-http-proxy'
 import CircuitBreaker from 'opossum'
 
 const SERVICES = {
-  '/images': process.env.IMAGE_SERVICE
+  '/images': process.env.IMAGE_SERVICE,
+  '/auth': process.env.AUTH_SERVICE
 }
 
 export function registerRoutes (app) {
@@ -11,25 +12,37 @@ export function registerRoutes (app) {
   })
 }
 
-function proxyWithBreaker (target) {
-  const proxyMiddleware = createProxyMiddleware({
-    target: target,
-    changeOrigin: true
-  })
+const circuitBreakerOptions = {
+  timeout: 5000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000
+}
 
-  const breakerOptions = {
-    errorThresholdPercentage: 50,
-    timeout: 5000,
-    resetTimeout: 30000
+function buildProxyOptions (resolve, reject) {
+  return {
+    limit: '10mb',
+    proxyErrorHandler: function () {
+      reject()
+    },
+    userResDecorator: function (proxyRes, proxyResData, userReq, userRes) {
+      resolve()
+      return proxyResData
+    }
   }
+}
 
-  const breaker = new CircuitBreaker(
-    (request, response) =>
-      proxyMiddleware(request, response, err => {
-        console.log(err)
-      }),
-    breakerOptions
-  )
+function proxyWithBreaker (target) {
+  const breaker = new CircuitBreaker((req, res, next) => {
+    return new Promise((resolve, reject) => {
+      proxy(target, buildProxyOptions(resolve, reject))(req, res, next)
+    })
+  }, circuitBreakerOptions)
 
-  return (req, res) => breaker.fire(req, res)
+  return async (req, res, next) => {
+    try {
+      await breaker.fire(req, res, next)
+    } catch (err) {
+      res.status(503).send('De service is tijdelijk niet beschikbaar.')
+    }
+  }
 }

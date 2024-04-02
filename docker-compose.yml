@@ -11,6 +11,7 @@ services:
       - "3000:3000"
     environment:
       - "IMAGE_SERVICE=http://imageservice:5672/"
+      - "AUTH_SERVICE=http://authservice:5672/"
     restart: always
   imageservice:
     build:
@@ -19,6 +20,18 @@ services:
     volumes:
       - ./imageservice:/app
       - ./data/images:/app/images
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgres://admin:ohzomoeilijkwachtwoord@postgres:5432/photoprestige
+      - PORT=5672
+    restart: always
+  authservice:
+    build:
+      context: ./authservice
+      dockerfile: /Dockerfile
+    volumes:
+      - ./authservice:/app
     depends_on:
       - postgres
     environment:
