@@ -22,6 +22,3 @@ CREATE TABLE IF NOT EXISTS  user_permissions (
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (permission_id) REFERENCES permissions (id) ON DELETE CASCADE
 );
-
-CREATE INDEX idx_user_permissions_user_id ON user_permissions (user_id);
-CREATE INDEX idx_user_permissions_permission_id ON user_permissions (permission_id);
