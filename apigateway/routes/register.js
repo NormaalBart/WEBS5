@@ -24,7 +24,7 @@ function buildProxyOptions (resolve, reject) {
     proxyErrorHandler: function () {
       reject()
     },
-    userResDecorator: function (proxyRes, proxyResData, userReq, userRes) {
+    userResDecorator: function (proxyReq, proxyResData, userReq, userRes) {
       resolve()
       return proxyResData
     }

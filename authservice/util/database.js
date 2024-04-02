@@ -1,7 +1,5 @@
-import dotenv from 'dotenv'
 import pkg from 'pg'
 const { Pool } = pkg
-dotenv.config()
 
 export class Database {
   constructor () {

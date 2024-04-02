@@ -12,6 +12,8 @@ const upload = multer({ storage })
 
 const db = new Database()
 
+app.use(express.json())
+
 app.post('/', upload.single('image'), async (req, res) => {
   const file = req.file
   if (!file) {
