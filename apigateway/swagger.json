@@ -1,0 +1,79 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Image Service API",
+    "version": "1.0.0",
+    "description": "API voor het beheren van afbeeldingen"
+  },
+  "paths": {
+    "/images/{id}": {
+      "get": {
+        "summary": "Haal een afbeelding op",
+        "description": "Haal een afbeelding op met de opgegeven ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "De unieke ID van de afbeelding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "De gevraagde afbeelding",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Afbeelding niet gevonden"
+          }
+        }
+      }
+    },
+    "/images": {
+      "post": {
+        "summary": "Upload een afbeelding",
+        "description": "Upload een afbeelding naar de service.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "image",
+            "type": "file",
+            "description": "De afbeelding om te uploaden.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Afbeelding succesvol geüpload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "De unieke identifier van de geüploade afbeelding."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
