@@ -1,31 +1,33 @@
 import express from 'express'
+import multer from 'multer'
 import { Database } from './util/database.js'
-import { decodeBase64Image } from './util/file.js'
-import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
+import fs from 'fs/promises'
+import path from 'path'
 
 const app = express()
 const port = process.env.PORT || 3000
-
-app.use(express.json({ limit: '50mb' }))
+const storage = multer.memoryStorage()
+const upload = multer({ storage })
 
 const db = new Database()
 
-app.post('/upload', async (req, res) => {
-  if (!req.body.image) {
+app.post('/upload', upload.single('image'), async (req, res) => {
+  const file = req.file
+  if (!file) {
     return res.status(400).send('Geen afbeelding gevonden in de request.')
   }
 
-  const fileName = uuidv4() + '.png'
+  const fileName = uuidv4() + path.extname(file.originalname)
   const filePath = path.join('images', fileName)
 
-  decodeBase64Image(req.body.image, filePath)
-
+  // Sla het bestand op
   try {
+    await fs.writeFile(filePath, file.buffer)
     const imageId = await db.saveImagePath(filePath)
     res.json({ id: imageId })
   } catch (error) {
-    console.error('Database error:', error)
+    console.error('Error bij het opslaan van de afbeelding:', error)
     res
       .status(500)
       .send('Fout bij het opslaan van de afbeelding in de database.')
@@ -37,20 +39,18 @@ app.get('/image/:id', async (req, res) => {
 
   try {
     const imagePath = await db.getImagePath(imageId)
-    console.log('ID: ' + imageId)
-    console.log('path: ' + imagePath)
 
     if (!imagePath) {
       return res.status(404).send('Afbeelding niet gevonden.')
     }
-
-    res.send(imagePath)
-    //res.sendFile(path.resolve(imagePath)) << Moet nog een custom coding in api gateway om foto te zien...
+    const absolutePath = path.resolve(imagePath)
+    res.sendFile(absolutePath)
   } catch (error) {
     console.error('Error:', error)
     res.status(500).send('Interne serverfout.')
   }
 })
+
 app.listen(port, () => {
   console.log(`Server luistert op poort ${port}`)
 })
