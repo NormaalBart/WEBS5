@@ -5,7 +5,7 @@ export const verify = async (req, res, next) => {
 
   if (typeof bearerHeader !== 'undefined') {
     try {
-      const verifyResponse = await fetch(`${process.env.AUTH_SERVICE}/verify`, {
+      const verifyResponse = await fetch(`${process.env.AUTH_SERVICE}verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -15,7 +15,7 @@ export const verify = async (req, res, next) => {
 
       if (verifyResponse.ok) {
         const authData = await verifyResponse.json()
-        req.authData = authData
+        req.authData = authData.data
         next()
       } else {
         res.status(403).send({ error: 'Forbidden' })
