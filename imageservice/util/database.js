@@ -9,13 +9,17 @@ export class Database {
     })
   }
 
-  async saveImagePath (imagePath, target) {
+  async query (text, params) {
+    const res = await this.pool.query(text, params)
+    return res
+  }
+
+  async saveImagePath (imagePath, target, ownerId) {
     const id = uuidv4()
-    await this.pool.query('INSERT INTO images(id, path, target) VALUES($1, $2, $3)', [
-      id,
-      imagePath,
-      target
-    ])
+    await this.pool.query(
+      'INSERT INTO images(id, path, target, owner_id) VALUES($1, $2, $3, $4)',
+      [id, imagePath, target, ownerId]
+    )
     return id
   }
 
@@ -30,5 +34,26 @@ export class Database {
     } else {
       return null
     }
+  }
+
+  async canDeleteImage (photoId, target, ownerId) {
+    const checkQuery = 'SELECT target, owner_id FROM images WHERE id = $1'
+    const checkRes = await this.query(checkQuery, [photoId])
+    if (checkRes.rowCount === 0) {
+      return { rowCount: 0, ownerMatch: false, targetMatch: false }
+    }
+    if (checkRes.rows[0].target !== target) {
+      return { rowCount: 1, ownerMatch: false, targetMatch: false }
+    }
+    if (checkRes.rows[0].owner_id !== ownerId) {
+      return { rowCount: 1, ownerMatch: false, targetMatch: true }
+    }
+    return { rowCount: 1, ownerMatch: true, targetMatch: true }
+  }
+
+  async deleteImage (imageId) {
+    const deleteQuery = 'DELETE FROM images WHERE id = $1 RETURNING path'
+    const deleteRes = await this.query(deleteQuery, [imageId])
+    return deleteRes.rows[0].path
   }
 }

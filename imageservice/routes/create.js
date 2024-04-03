@@ -9,6 +9,7 @@ const upload = multer({ storage })
 export const register = (app, db, rabbitMq) => {
   app.post('/:target', upload.single('image'), async (req, res) => {
     const { target } = req.params
+    const ownerId = req.headers.authdata.userId
     const file = req.file
     if (!file) {
       return res.status(400).send('Geen afbeelding gevonden in de request.')
@@ -19,7 +20,7 @@ export const register = (app, db, rabbitMq) => {
 
     try {
       await fs.writeFile(filePath, file.buffer)
-      const imageId = await db.saveImagePath(filePath, target)
+      const imageId = await db.saveImagePath(filePath, target, ownerId)
       res.json({ id: imageId })
       rabbitMq.sendToQueue(process.env.RABBITMQ_MAIL_CHANNEL, {
         template: 'photo-received',

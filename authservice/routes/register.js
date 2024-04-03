@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs'
+import validator from 'validator'
 
 export const register = (app, db, rabbitMq) => {
   app.post('/register', async (req, res) => {
@@ -11,8 +12,7 @@ export const register = (app, db, rabbitMq) => {
       return
     }
 
-    const emailRegex = /(.+)@(.+){2,}\.(.+){2,}/
-    if (!emailRegex.test(mail)) {
+    if (!validator.isEmail(mail)) {
       res.status(400).send({ error: 'Ongeldig e-mailadres.' })
       return
     }
