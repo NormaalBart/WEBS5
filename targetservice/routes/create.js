@@ -1,6 +1,7 @@
 export const register = (app, db) => {
   app.post('/', async (req, res) => {
     const { name, longitude, latitude, endTime } = req.body
+    const ownerId = req.headers.authdata.userId
 
     if (
       !name ||
@@ -29,7 +30,7 @@ export const register = (app, db) => {
     }
 
     try {
-      const id = await db.createTarget(name, longitude, latitude, endTimeDate)
+      const id = await db.createTarget(name, longitude, latitude, ownerId, endTimeDate)
       res.status(201).send({ id })
     } catch (error) {
       console.error('Fout bij het aanmaken van de target:', error)

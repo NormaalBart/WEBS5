@@ -13,31 +13,44 @@ export class Database {
     return res
   }
 
-  async createTarget (name, longitude, latitude, endTimeDate) {
+  async createTarget (name, longitude, latitude, ownerId, endTimeDate) {
     const text =
-      'INSERT INTO targets(name, longitude, latitude, end_time) VALUES($1, $2, $3, $4) RETURNING id'
-    const params = [name, longitude, latitude, endTimeDate.toISOString()]
+      'INSERT INTO targets(name, longitude, latitude, owner_id, end_time) VALUES($1, $2, $3, $4, $5) RETURNING id'
+    const params = [
+      name,
+      longitude,
+      latitude,
+      ownerId,
+      endTimeDate.toISOString()
+    ]
     const res = await this.query(text, params)
     return res.rows[0].id
   }
 
-  async deleteTarget (targetId) {
-    const text = 'DELETE FROM targets WHERE id = $1 RETURNING id'
-    const params = [targetId]
-    const res = await this.query(text, params)
-    return res.rowCount
+  async deleteTarget (targetId, ownerId) {
+    const checkQuery = 'SELECT owner_id FROM targets WHERE id = $1'
+    const checkRes = await this.query(checkQuery, [targetId])
+    if (checkRes.rowCount === 0) {
+      return { rowCount: 0, ownerMatch: false }
+    }
+    if (checkRes.rows[0].owner_id !== ownerId) {
+      return { rowCount: 1, ownerMatch: false }
+    }
+
+    const deleteQuery = 'DELETE FROM targets WHERE id = $1 RETURNING id'
+    const deleteRes = await this.query(deleteQuery, [targetId])
+    return { rowCount: deleteRes.rowCount, ownerMatch: true }
   }
 
   async getTargets () {
-    const text = 'SELECT id, name, longitude, latitude, end_time FROM targets'
+    const text = 'SELECT * FROM targets'
     const res = await this.query(text)
     const targets = res.rows.map(this.convertEndTimeToMilliseconds)
     return targets
   }
 
   async getTargetById (targetId) {
-    const text =
-      'SELECT id, name, longitude, latitude, end_time FROM targets WHERE id = $1'
+    const text = 'SELECT * FROM targets WHERE id = $1'
     const params = [targetId]
     const res = await this.query(text, params)
     const target = res.rows.map(this.convertEndTimeToMilliseconds)[0]

@@ -20,6 +20,12 @@ const SERVICES = {
   }
 }
 
+const circuitBreakerOptions = {
+  timeout: 5000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 3000
+}
+
 export function registerRoutes (app) {
   Object.entries(SERVICES).forEach(
     ([route, { url, requireAuth, excludeRoutes = [] }]) => {
@@ -43,11 +49,6 @@ export function registerRoutes (app) {
       app.use(route, ...middlewares)
     }
   )
-}
-const circuitBreakerOptions = {
-  timeout: 5000,
-  errorThresholdPercentage: 50,
-  resetTimeout: 30000
 }
 
 function buildProxyOptions (resolve, reject) {

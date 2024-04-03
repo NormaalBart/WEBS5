@@ -25,7 +25,7 @@ export const register = (app, db) => {
       const token = jwt.sign(
         { userId: user.id, username: user.username },
         process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '2400h' }
       )
 
       res.json({ token })

@@ -15,7 +15,7 @@ export const verify = async (req, res, next) => {
 
       if (verifyResponse.ok) {
         const authData = await verifyResponse.json()
-        req.authData = authData.data
+        req.headers.authdata = JSON.stringify(authData.data)
         next()
       } else {
         res.status(403).send({ error: 'Forbidden' })
