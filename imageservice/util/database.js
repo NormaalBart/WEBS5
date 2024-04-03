@@ -9,19 +9,20 @@ export class Database {
     })
   }
 
-  async saveImagePath (imagePath) {
+  async saveImagePath (imagePath, target) {
     const id = uuidv4()
-    await this.pool.query('INSERT INTO images(id, path) VALUES($1, $2)', [
+    await this.pool.query('INSERT INTO images(id, path, target) VALUES($1, $2, $3)', [
       id,
-      imagePath
+      imagePath,
+      target
     ])
     return id
   }
 
-  async getImagePath (id) {
+  async getImagePath (id, target) {
     const { rows } = await this.pool.query(
-      'SELECT path FROM images WHERE id = $1',
-      [id]
+      'SELECT path FROM images WHERE id = $1 AND target = $2',
+      [id, target]
     )
 
     if (rows.length > 0) {

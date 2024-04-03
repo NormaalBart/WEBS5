@@ -56,8 +56,6 @@ async function loadAndParseTemplate (templateName, data) {
   const __dirname = path.dirname(__filename)
   const templatePath = path.join(__dirname, 'templates', `${templateName}.html`)
 
-  console.log(templatePath)
-
   try {
     let templateContent = await fs.promises.readFile(templatePath, 'utf-8')
 

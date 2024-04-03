@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS images (
     id UUID PRIMARY KEY,
+    target VARCHAR(255) NOT NULL,
     path VARCHAR(255) NOT NULL
 );

@@ -1,11 +1,11 @@
 import path from 'path'
 
 export const register = (app, db) => {
-  app.get('/:id', async (req, res) => {
-    const imageId = req.params.id
+  app.get('/:target/:imageId', async (req, res) => {
+    const { target, imageId } = req.params
 
     try {
-      const imagePath = await db.getImagePath(imageId)
+      const imagePath = await db.getImagePath(imageId, target)
 
       if (!imagePath) {
         return res.status(404).send('Afbeelding niet gevonden.')

@@ -3,7 +3,7 @@ import CircuitBreaker from 'opossum'
 import { verify } from '../util/verify.js'
 
 const SERVICES = {
-  '/images': {
+  '/targets/:target/images': {
     url: process.env.IMAGE_SERVICE,
     requireAuth: true,
     excludeRoutes: []
@@ -29,7 +29,7 @@ const circuitBreakerOptions = {
 export function registerRoutes (app) {
   Object.entries(SERVICES).forEach(
     ([route, { url, requireAuth, excludeRoutes = [] }]) => {
-      const proxyMiddleware = proxyWithBreaker(url)
+      const proxyMiddleware = proxyWithBreaker(route, url)
 
       const checkExcludeRoutes = (req, res, next) => {
         const path = req.path.replace(route, '')
@@ -51,7 +51,7 @@ export function registerRoutes (app) {
   )
 }
 
-function buildProxyOptions (resolve, reject) {
+function buildProxyOptions (resolve, reject, target, req, route) {
   return {
     limit: '10mb',
     proxyErrorHandler: function () {
@@ -60,14 +60,30 @@ function buildProxyOptions (resolve, reject) {
     userResDecorator: function (proxyReq, proxyResData, userReq, userRes) {
       resolve()
       return proxyResData
+    },
+    proxyReqPathResolver: function (req) {
+      const additionalPath = req.originalUrl.replace(req.baseUrl, '')
+      const newPathSegments = Object.values(req.params)
+
+      if (additionalPath) {
+        newPathSegments.push(additionalPath.substring(1))
+      }
+
+      const newPath = '/' + newPathSegments.join('/')
+      const fullPath = `${target.replace(/\/$/, '')}${newPath}`
+      return fullPath
     }
   }
 }
 
-function proxyWithBreaker (target) {
+function proxyWithBreaker (route, target) {
   const breaker = new CircuitBreaker((req, res, next) => {
     return new Promise((resolve, reject) => {
-      proxy(target, buildProxyOptions(resolve, reject))(req, res, next)
+      proxy(target, buildProxyOptions(resolve, reject, target, req, route))(
+        req,
+        res,
+        next
+      )
     })
   }, circuitBreakerOptions)
 

@@ -13,6 +13,7 @@ export const verify = async (req, res, next) => {
         }
       })
 
+
       if (verifyResponse.ok) {
         const authData = await verifyResponse.json()
         req.headers.authdata = JSON.stringify(authData.data)
