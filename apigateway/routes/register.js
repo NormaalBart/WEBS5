@@ -3,21 +3,47 @@ import CircuitBreaker from 'opossum'
 import { verify } from '../util/verify.js'
 
 const SERVICES = {
-  '/images': { url: process.env.IMAGE_SERVICE, requireAuth: true },
-  '/auth': { url: process.env.AUTH_SERVICE, requireAuth: false },
-  '/targets': { url: process.env.TARGET_SERVICE, requireAuth: true }
+  '/images': {
+    url: process.env.IMAGE_SERVICE,
+    requireAuth: true,
+    excludeRoutes: []
+  },
+  '/auth': {
+    url: process.env.AUTH_SERVICE,
+    requireAuth: false,
+    excludeRoutes: ['/verify']
+  },
+  '/targets': {
+    url: process.env.TARGET_SERVICE,
+    requireAuth: true,
+    excludeRoutes: []
+  }
 }
 
 export function registerRoutes (app) {
-  Object.entries(SERVICES).forEach(([route, { url, requireAuth }]) => {
-    if (requireAuth) {
-      app.use(route, verify, proxyWithBreaker(url))
-    } else {
-      app.use(route, proxyWithBreaker(url))
-    }
-  })
-}
+  Object.entries(SERVICES).forEach(
+    ([route, { url, requireAuth, excludeRoutes = [] }]) => {
+      const proxyMiddleware = proxyWithBreaker(url)
 
+      const checkExcludeRoutes = (req, res, next) => {
+        const path = req.path.replace(route, '')
+        if (excludeRoutes.includes(path)) {
+          return res.status(404).send({ error: 'Not found' })
+        }
+        next()
+      }
+
+      // Bepaal de te gebruiken middleware
+      const middlewares = [checkExcludeRoutes]
+      if (requireAuth) {
+        middlewares.push(verify)
+      }
+      middlewares.push(proxyMiddleware)
+
+      app.use(route, ...middlewares)
+    }
+  )
+}
 const circuitBreakerOptions = {
   timeout: 5000,
   errorThresholdPercentage: 50,

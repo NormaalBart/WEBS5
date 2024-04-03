@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken'
 export const register = (app, db) => {
   app.post('/verify', async (req, res) => {
     const bearerHeader = req.headers.authorization
-    console.log('called')
     if (typeof bearerHeader !== 'undefined') {
       const bearer = bearerHeader.split(' ')
       const bearerToken = bearer[1]
