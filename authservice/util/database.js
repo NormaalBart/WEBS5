@@ -13,24 +13,24 @@ export class Database {
     return res
   }
 
-  async userExists (username) {
-    const res = await this.query('SELECT * FROM users WHERE username = $1', [
-      username
+  async userExists (mail) {
+    const res = await this.query('SELECT * FROM users WHERE mail = $1', [
+      mail
     ])
     return res.rows.length > 0
   }
 
-  async registerUser (username, hashedPassword) {
+  async registerUser (username, mail, hashedPassword) {
     const res = await this.query(
-      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
-      [username, hashedPassword]
+      'INSERT INTO users (username, mail, password) VALUES ($1, $2, $3) RETURNING id',
+      [username, mail, hashedPassword]
     )
     return res.rows[0]
   }
 
-  async getUserByUsername (username) {
-    const res = await this.query('SELECT * FROM users WHERE username = $1', [
-      username
+  async getUserByMail (mail) {
+    const res = await this.query('SELECT * FROM users WHERE mail = $1', [
+      mail
     ])
     return res.rows[0]
   }

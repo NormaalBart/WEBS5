@@ -3,27 +3,30 @@ import bcrypt from 'bcryptjs'
 
 export const register = (app, db) => {
   app.post('/login', async (req, res, next) => {
-    const { username, password } = req.body
+    const { mail, password } = req.body
 
-    if (!username || !password) {
-      res.status(400).send({ error: 'Username, Password zijn verplichte velden' })
+    if (!mail || !password) {
+      res.status(400).send({ error: 'Mail, Password zijn verplichte velden' })
+      return
     }
 
     try {
-      const user = await db.getUserByUsername(username)
+      const user = await db.getUserByMail(mail.toLowerCase())
 
       if (!user) {
         res.status(401).send({ error: 'Gebruiker bestaat niet' })
+        return
       }
 
       const isValid = await bcrypt.compare(password, user.password)
 
       if (!isValid) {
         res.status(401).send({ error: 'Fout wachtwoord' })
+        return
       }
 
       const token = jwt.sign(
-        { userId: user.id, username: user.username },
+        { userId: user.id, username: user.username, mail: user.mail },
         process.env.JWT_SECRET,
         { expiresIn: '2400h' }
       )

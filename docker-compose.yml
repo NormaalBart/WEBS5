@@ -48,6 +48,8 @@ services:
     environment:
       DATABASE_URL: ${AUTH_SERVICE_DB}
       PORT: ${EXPRESS_PORT}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_MAIL_CHANNEL: ${RABBITMQ_MAIL_CHANNEL}
     restart: always
   authservicedb:
     image: postgres:16
