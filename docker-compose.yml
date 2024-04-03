@@ -12,6 +12,7 @@ services:
     environment:
       - "IMAGE_SERVICE=http://imageservice:5672/"
       - "AUTH_SERVICE=http://authservice:5672/"
+      - "TARGET_SERVICE=http://targetservice:5672/"
     restart: always
   imageservice:
     build:
@@ -53,6 +54,28 @@ services:
     volumes:
       - ./data/authservice:/var/lib/postgresql/data
       - ./databasescripts/authservice.sql:/docker-entrypoint-initdb.d/init-db.sql
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ohzomoeilijkwachtwoord
+      POSTGRES_DB: photoprestige
+    restart: always
+  targetservice:
+    build:
+      context: ./targetservice
+      dockerfile: /Dockerfile
+    volumes:
+      - ./targetservice:/app
+    depends_on:
+      - targetservicedb
+    environment:
+      - DATABASE_URL=postgres://admin:ohzomoeilijkwachtwoord@targetservicedb:5432/photoprestige
+      - PORT=5672
+    restart: always
+  targetservicedb:
+    image: postgres:16
+    volumes:
+      - ./data/targetservice:/var/lib/postgresql/data
+      - ./databasescripts/targetservice.sql:/docker-entrypoint-initdb.d/init-db.sql
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: ohzomoeilijkwachtwoord

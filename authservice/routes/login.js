@@ -6,20 +6,20 @@ export const register = (app, db) => {
     const { username, password } = req.body
 
     if (!username || !password) {
-      return res.status(400).send('Mist parameters')
+      res.status(400).send({ error: 'Username, Password zijn verplichte velden' })
     }
 
     try {
       const user = await db.getUserByUsername(username)
 
       if (!user) {
-        return res.status(401).send('Gebruiker bestaat niet')
+        res.status(401).send({ error: 'Gebruiker bestaat niet' })
       }
 
       const isValid = await bcrypt.compare(password, user.password)
 
       if (!isValid) {
-        return res.status(401).send('Onjuist wachtwoord')
+        res.status(401).send({ error: 'Fout wachtwoord' })
       }
 
       const token = jwt.sign(
@@ -31,7 +31,7 @@ export const register = (app, db) => {
       res.json({ token })
     } catch (error) {
       console.error(error)
-      res.status(500).send('Serverfout bij het inloggen')
+      res.status(500).send({ error: 'Interne serverfout' })
     }
   })
 }

@@ -22,7 +22,7 @@ export class Database {
 
   async registerUser (username, hashedPassword) {
     const res = await this.query(
-      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *',
+      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
       [username, hashedPassword]
     )
     return res.rows[0]

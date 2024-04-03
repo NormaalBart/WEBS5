@@ -1,14 +1,20 @@
 import proxy from 'express-http-proxy'
 import CircuitBreaker from 'opossum'
+import { verify } from '../util/verify.js'
 
 const SERVICES = {
-  '/images': process.env.IMAGE_SERVICE,
-  '/auth': process.env.AUTH_SERVICE
+  '/images': { url: process.env.IMAGE_SERVICE, requireAuth: true },
+  '/auth': { url: process.env.AUTH_SERVICE, requireAuth: false },
+  '/targets': { url: process.env.TARGET_SERVICE, requireAuth: true }
 }
 
 export function registerRoutes (app) {
-  Object.entries(SERVICES).forEach(([route, target]) => {
-    app.use(route, proxyWithBreaker(target))
+  Object.entries(SERVICES).forEach(([route, { url, requireAuth }]) => {
+    if (requireAuth) {
+      app.use(route, verify, proxyWithBreaker(url))
+    } else {
+      app.use(route, proxyWithBreaker(url))
+    }
   })
 }
 

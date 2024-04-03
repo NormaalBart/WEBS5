@@ -5,23 +5,25 @@ export const register = (app, db) => {
     const { username, password } = req.body
 
     if (!username || !password) {
-      return res.status(400).send('Mist parameters')
+      res
+        .status(400)
+        .send({ error: 'Username, Password zijn verplichte velden' })
+      return
     }
 
     try {
       if (await db.userExists(username)) {
-        return res.status(409).send('Gebruikersnaam bestaat al')
+        res.status(409).send({ error: 'Gebruiker bestaat al' })
+        return
       }
 
       const hashedPassword = await bcrypt.hash(password, 10)
-      const user = await db.registerUser(username, hashedPassword)
+      const id = await db.registerUser(username, hashedPassword)
 
-      res.status(201).send(`Gebruiker ${user.username} succesvol geregistreerd`)
+      res.status(201).send(id)
     } catch (error) {
       console.error(error)
-      res
-        .status(500)
-        .send('Er is een fout opgetreden bij het registreren van de gebruiker')
+      res.status(500).send({ error: 'Interne serverfout' })
     }
   })
 }
