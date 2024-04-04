@@ -65,7 +65,8 @@ export const register = (app, db, rabbitMq) => {
         targetId: id,
         ownerId,
         uuid,
-        filePath
+        filePath,
+        originalFile: true
       })
     } catch (error) {
       console.error('Fout bij het aanmaken van de target:', error)

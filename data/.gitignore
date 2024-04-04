@@ -2,3 +2,4 @@ authservice/**
 imageservice/**
 targetservice/**
 mailhog/**
+scoreservice/**

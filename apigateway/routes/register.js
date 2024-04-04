@@ -13,6 +13,11 @@ const SERVICES = {
     requireAuth: true,
     excludeRoutes: []
   },
+  '/targets/:target/scores': {
+    url: process.env.SCORE_SERVICE,
+    requireAuth: true,
+    excludeRoutes: []
+  },
   '/auth': {
     url: process.env.AUTH_SERVICE,
     requireAuth: false,

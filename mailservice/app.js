@@ -24,7 +24,6 @@ async function startConsumer () {
       const { template, subject, mail, data } = JSON.parse(msg.content.toString())
       const emailContent = await loadAndParseTemplate(template, data)
 
-      console.log(emailContent)
       if (emailContent) {
         await sendMail(mail, subject, emailContent)
       } else {

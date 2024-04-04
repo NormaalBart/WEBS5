@@ -37,7 +37,8 @@ export const register = (app, db, rabbitMq) => {
         targetId: target,
         ownerId,
         uuid,
-        filePath
+        filePath,
+        originalFile: false
       })
     } catch (error) {
       console.error('Error bij het opslaan van de afbeelding:', error)
