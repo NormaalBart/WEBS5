@@ -11,7 +11,6 @@ const transporter = nodemailer.createTransport({
 })
 
 async function startConsumer () {
-  console.log(process.env.RABBITMQ)
   const connection = await amqp.connect(process.env.RABBITMQ_URL)
   const channel = await connection.createChannel()
   const queue = process.env.RABBITMQ_MAIL_CHANNEL
