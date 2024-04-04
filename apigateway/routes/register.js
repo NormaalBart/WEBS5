@@ -49,7 +49,6 @@ export function registerRoutes (app) {
         next()
       }
 
-      // Bepaal de te gebruiken middleware
       const middlewares = [checkExcludeRoutes]
       if (requireAuth) {
         middlewares.push(verify)

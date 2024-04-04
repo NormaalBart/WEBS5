@@ -1,6 +1,13 @@
+CREATE TABLE IF NOT EXISTS targets (
+    id SERIAL PRIMARY KEY,
+    longitude NUMERIC(10, 7) NOT NULL,
+    latitude NUMERIC(10, 7) NOT NULL,
+    end_time TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS images (
     id UUID PRIMARY KEY,
-    target VARCHAR(255) NOT NULL,
+    target INT NOT NULL,
     owner_id INTEGER NOT NULL,
     path VARCHAR(255) NOT NULL
 );

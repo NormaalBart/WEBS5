@@ -68,6 +68,13 @@ export const register = (app, db, rabbitMq) => {
         filePath,
         originalFile: true
       })
+      rabbitMq.broadcast(process.env.RABBITMQ_CREATE_CHANNEL, {
+        type: 'target',
+        id,
+        endTimeDate: endTimeDate.toISOString(),
+        longitude,
+        latitude
+      })
     } catch (error) {
       console.error('Fout bij het aanmaken van de target:', error)
       res.status(500).send({ error: 'Interne serverfout' })

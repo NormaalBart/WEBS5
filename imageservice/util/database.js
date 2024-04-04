@@ -54,4 +54,32 @@ export class Database {
     const deleteRes = await this.query(deleteQuery, [imageId])
     return deleteRes.rows[0].path
   }
+
+  async deleteImages (targetId) {
+    const deleteQuery = 'DELETE FROM images WHERE target = $1'
+    await this.query(deleteQuery, [targetId])
+  }
+
+  async createTarget (id, endTimeDate, longitude, latitude) {
+    const insertQuery =
+      'INSERT INTO targets(id, end_time, longitude, latitude) VALUES($1, $2, $3, $4) RETURNING id'
+    const res = await this.query(insertQuery, [
+      id,
+      endTimeDate,
+      longitude,
+      latitude
+    ])
+    return res.rows[0].id
+  }
+
+  async deleteTarget (id) {
+    const deleteQuery = 'DELETE FROM targets WHERE id = $1'
+    await this.query(deleteQuery, [id])
+  }
+
+  async getTarget (id) {
+    const checkQuery = 'SELECT * FROM targets WHERE id = $1'
+    const res = await this.query(checkQuery, [id])
+    return res.rows[0]
+  }
 }

@@ -7,12 +7,29 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
 export const register = (app, db, rabbitMq) => {
-  app.post('/:target', upload.single('image'), async (req, res) => {
-    const { target } = req.params
+  app.post('/:targetId', upload.single('image'), async (req, res) => {
+    const { targetId } = req.params
     const ownerId = req.headers.authdata.userId
     const file = req.file
     if (!file) {
-      return res.status(400).send('Geen afbeelding gevonden in de request.')
+      return res
+        .status(400)
+        .send({ message: 'Geen afbeelding gevonden in de request.' })
+    }
+
+    const target = await db.getTarget(targetId)
+
+    if (!target) {
+      return res.status(400).send({ message: 'Target bestaat niet.' })
+    }
+
+    const endTime = new Date(target.end_time)
+    const now = new Date()
+
+    if (endTime <= now) {
+      return res
+        .status(410)
+        .send({ message: 'De tijd voor dit target is verstreken.' })
     }
 
     const uuid = uuidv4()
@@ -21,7 +38,7 @@ export const register = (app, db, rabbitMq) => {
 
     try {
       await fs.writeFile(filePath, file.buffer)
-      const imageId = await db.saveImagePath(uuid, filePath, target, ownerId)
+      const imageId = await db.saveImagePath(uuid, filePath, targetId, ownerId)
       res.json({ id: imageId })
       rabbitMq.sendToQueue(process.env.RABBITMQ_MAIL_CHANNEL, {
         template: 'photo-received',
@@ -30,11 +47,11 @@ export const register = (app, db, rabbitMq) => {
         data: {
           name: req.headers.authdata.username,
           url: 'TODO',
-          target
+          target: targetId
         }
       })
       rabbitMq.sendToQueue(process.env.RABBITMQ_SCORE_CHANNEL, {
-        targetId: target,
+        targetId,
         ownerId,
         uuid,
         filePath,

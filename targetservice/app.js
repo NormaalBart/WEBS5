@@ -5,7 +5,7 @@ import { RabbitMQUtil } from './util/rabbitmq.js'
 
 const app = express()
 const db = new Database()
-const rabbitMq = new RabbitMQUtil()
+const rabbitMq = new RabbitMQUtil(db)
 
 const port = process.env.PORT || 3000
 

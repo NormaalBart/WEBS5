@@ -31,6 +31,11 @@ export class Database {
     return res.rows[0].tags
   }
 
+  async deleteImageTagsIfExists (uuid) {
+    const deleteQuery = 'DELETE FROM image_results WHERE image_uuid = $1'
+    await this.query(deleteQuery, [uuid])
+  }
+
   async insertImageResult (targetId, imageUuid, ownerId, score) {
     const text =
       'INSERT INTO image_results(target_id, image_uuid, owner_id, score) VALUES($1, $2, $3, $4) RETURNING id'
@@ -65,5 +70,22 @@ export class Database {
     const resultsRes = await this.query(resultsQuery, resultsParams)
 
     return { isOwner: true, data: resultsRes.rows }
+  }
+
+  async createTarget (id) {
+    const insertQuery = 'INSERT INTO targets(id) VALUES($1) RETURNING id'
+    const res = await this.query(insertQuery, [id])
+    return res.rows[0].id
+  }
+
+  async deleteTarget (id) {
+    const deleteQuery = 'DELETE FROM targets WHERE id = $1'
+    await this.query(deleteQuery, [id])
+  }
+
+  async getTarget (id) {
+    const checkQuery = 'SELECT * FROM targets WHERE id = $1'
+    const res = await this.query(checkQuery, [id])
+    return res.rows[0]
   }
 }

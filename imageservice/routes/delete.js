@@ -2,7 +2,7 @@ import validator from 'validator'
 import path from 'path'
 import fs from 'fs'
 
-export const register = (app, db) => {
+export const register = (app, db, rabbitMq) => {
   app.delete('/:target/:imageId', async (req, res) => {
     const { target, imageId } = req.params
     const ownerId = req.headers.authdata.userId
@@ -12,8 +12,6 @@ export const register = (app, db) => {
         error: 'Ongeldige id.'
       })
     }
-
-    console.log(target)
 
     try {
       const { rowCount, ownerMatch, targetMatch } = await db.canDeleteImage(
@@ -37,6 +35,10 @@ export const register = (app, db) => {
       const absolutePath = path.resolve(imagePath)
       fs.unlinkSync(absolutePath)
       res.status(200).send({ message: 'Afbeelding succesvol verwijderd.' })
+      rabbitMq.broadcast(process.env.RABBITMQ_DELETE_CHANNEL, {
+        type: 'target',
+        id: imageId
+      })
     } catch (error) {
       console.error('Fout bij het verwijderen van de afbeelding:', error)
       res.status(500).send({ error: 'Interne serverfout' })

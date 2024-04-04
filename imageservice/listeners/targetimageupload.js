@@ -15,7 +15,7 @@ export const register = async (connection, database) => {
     )
 
     database.saveImagePath(uuid, imagePath, targetId, ownerId)
-    
+
     channel.ack(msg)
   })
 }

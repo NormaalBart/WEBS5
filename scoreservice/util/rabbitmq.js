@@ -22,6 +22,11 @@ export class RabbitMQUtil {
     this.channel.sendToQueue(channel, Buffer.from(JSON.stringify(data)))
   }
 
+  async broadcast (exchange, data) {
+    await this.channel.assertExchange(exchange, 'fanout', { durable: false })
+    this.channel.publish(exchange, '', Buffer.from(JSON.stringify(data)))
+  }
+
   loadListeners (database) {
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)

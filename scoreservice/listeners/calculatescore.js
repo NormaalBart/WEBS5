@@ -18,10 +18,6 @@ export const register = async (connection, database) => {
       msg.content.toString()
     )
 
-    console.log(msg.content.toString())
-    console.log(process.env.IMAGGA_USERNAME)
-    console.log(process.env.IMAGGA_PASSWORD)
-
     const form = new FormData()
     form.append('image', fs.createReadStream(filePath))
 
@@ -41,6 +37,9 @@ export const register = async (connection, database) => {
       })
       .then(async response => {
         const jsonResponse = JSON.parse(JSON.stringify(response.data))
+        if (!(await database.getTarget(targetId))) {
+          return
+        }
         if (originalFile) {
           database.createScore(
             targetId,

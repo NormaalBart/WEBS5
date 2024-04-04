@@ -1,4 +1,4 @@
-export const register = (app, db) => {
+export const register = (app, db, rabbitMq) => {
   app.delete('/:id', async (req, res) => {
     const { id } = req.params
     const ownerId = req.headers.authdata.userId
@@ -14,6 +14,10 @@ export const register = (app, db) => {
           .send({ error: 'Geen toestemming om deze target te verwijderen.' })
       }
       res.status(200).send({ message: 'Target succesvol verwijderd.' })
+      rabbitMq.broadcast(process.env.RABBITMQ_DELETE_CHANNEL, {
+        type: 'target',
+        id
+      })
     } catch (error) {
       console.error('Fout bij het verwijderen van de target:', error)
       res.status(500).send({ error: 'Interne serverfout' })
