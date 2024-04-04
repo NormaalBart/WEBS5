@@ -9,6 +9,8 @@ services:
       - ./apigateway:/app
     ports:
       - "3000:3000"
+    depends_on:
+      - authservice
     environment:
       IMAGE_SERVICE: ${IMAGE_SERVICE}
       AUTH_SERVICE: ${AUTH_SERVICE}
@@ -23,11 +25,13 @@ services:
       - ./data/images:/app/images
     depends_on:
       - imageservicedb
+      - rabbitmq
     environment:
       DATABASE_URL: ${IMAGE_SERVICE_DB}
       PORT: ${EXPRESS_PORT}
       RABBITMQ_URL: ${RABBITMQ_URL}
       RABBITMQ_MAIL_CHANNEL: ${RABBITMQ_MAIL_CHANNEL}
+      RABBITMQ_TARGET_IMAGE_CHANNEL: ${RABBITMQ_TARGET_IMAGE_CHANNEL}
     restart: always
   imageservicedb:
     image: postgres:16
@@ -47,6 +51,7 @@ services:
       - ./authservice:/app
     depends_on:
       - imageservicedb
+      - rabbitmq
     environment:
       DATABASE_URL: ${AUTH_SERVICE_DB}
       PORT: ${EXPRESS_PORT}
@@ -69,11 +74,15 @@ services:
       dockerfile: /Dockerfile
     volumes:
       - ./targetservice:/app
+      - ./data/images:/app/images
     depends_on:
       - targetservicedb
+      - rabbitmq
     environment:
       DATABASE_URL: ${TARGET_SERVICE_DB}
       PORT: ${EXPRESS_PORT}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_TARGET_IMAGE_CHANNEL: ${RABBITMQ_TARGET_IMAGE_CHANNEL}
     restart: always
   targetservicedb:
     image: postgres:16

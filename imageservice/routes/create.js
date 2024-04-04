@@ -15,12 +15,13 @@ export const register = (app, db, rabbitMq) => {
       return res.status(400).send('Geen afbeelding gevonden in de request.')
     }
 
-    const fileName = uuidv4() + path.extname(file.originalname)
+    const uuid = uuidv4()
+    const fileName = uuid + path.extname(file.originalname)
     const filePath = path.join('images', fileName)
 
     try {
       await fs.writeFile(filePath, file.buffer)
-      const imageId = await db.saveImagePath(filePath, target, ownerId)
+      const imageId = await db.saveImagePath(uuid, filePath, target, ownerId)
       res.json({ id: imageId })
       rabbitMq.sendToQueue(process.env.RABBITMQ_MAIL_CHANNEL, {
         template: 'photo-received',

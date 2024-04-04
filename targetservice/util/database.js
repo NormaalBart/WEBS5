@@ -13,15 +13,16 @@ export class Database {
     return res
   }
 
-  async createTarget (name, longitude, latitude, ownerId, endTimeDate) {
+  async createTarget (name, longitude, latitude, ownerId, endTimeDate, filePath) {
     const text =
-      'INSERT INTO targets(name, longitude, latitude, owner_id, end_time) VALUES($1, $2, $3, $4, $5) RETURNING id'
+      'INSERT INTO targets(name, longitude, latitude, owner_id, end_time, image_path) VALUES($1, $2, $3, $4, $5, $6) RETURNING id'
     const params = [
       name,
       longitude,
       latitude,
       ownerId,
-      endTimeDate.toISOString()
+      endTimeDate.toISOString(),
+      filePath
     ]
     const res = await this.query(text, params)
     return res.rows[0].id

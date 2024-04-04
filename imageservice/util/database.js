@@ -1,5 +1,4 @@
 import pkg from 'pg'
-import { v4 as uuidv4 } from 'uuid'
 const { Pool } = pkg
 
 export class Database {
@@ -14,8 +13,7 @@ export class Database {
     return res
   }
 
-  async saveImagePath (imagePath, target, ownerId) {
-    const id = uuidv4()
+  async saveImagePath (id, imagePath, target, ownerId) {
     await this.pool.query(
       'INSERT INTO images(id, path, target, owner_id) VALUES($1, $2, $3, $4)',
       [id, imagePath, target, ownerId]
