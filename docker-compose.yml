@@ -25,8 +25,10 @@ services:
       - ./imageservice:/app
       - ./data/images:/app/images
     depends_on:
-      - imageservicedb
-      - rabbitmq
+      imageservicedb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${IMAGE_SERVICE_DB}
       PORT: ${EXPRESS_PORT}
@@ -45,6 +47,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   authservice:
     build:
       context: ./authservice
@@ -52,8 +59,10 @@ services:
     volumes:
       - ./authservice:/app
     depends_on:
-      - imageservicedb
-      - rabbitmq
+      authservicedb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${AUTH_SERVICE_DB}
       PORT: ${EXPRESS_PORT}
@@ -70,6 +79,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   targetservice:
     build:
       context: ./targetservice
@@ -78,8 +92,10 @@ services:
       - ./targetservice:/app
       - ./data/images:/app/images
     depends_on:
-      - targetservicedb
-      - rabbitmq
+      targetservicedb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${TARGET_SERVICE_DB}
       PORT: ${EXPRESS_PORT}
@@ -97,6 +113,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   mailservice:
     build:
       context: ./mailservice
@@ -104,8 +125,10 @@ services:
     volumes:
       - ./mailservice:/app
     depends_on:
-      - mailhog
-      - rabbitmq
+      mailhog:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       MAIL_HOG: ${MAIL_SERVER}
       RABBITMQ_MAIL_CHANNEL: ${RABBITMQ_MAIL_CHANNEL}
@@ -118,8 +141,10 @@ services:
       - ./scoreservice:/app
       - ./data/images:/app/images
     depends_on:
-      - rabbitmq
-      - scoreservicedb
+      scoreservicedb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       PORT: ${EXPRESS_PORT}
       RABBITMQ_URL: ${RABBITMQ_URL}
@@ -138,6 +163,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   mailhog:
     image: mailhog/mailhog
     environment:
@@ -149,6 +179,11 @@ services:
       - "1025:1025" # SMTP server
       - "8025:8025" # Web interface
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   rabbitmq:
     image: "rabbitmq:3.13-management"
     volumes:
@@ -160,3 +195,8 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     restart: always
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 5s
+      retries: 5
