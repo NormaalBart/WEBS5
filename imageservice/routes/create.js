@@ -14,13 +14,13 @@ export const register = (app, db, rabbitMq) => {
     if (!file) {
       return res
         .status(400)
-        .send({ message: 'Geen afbeelding gevonden in de request.' })
+        .send({ error: 'Geen afbeelding gevonden in de request.' })
     }
 
     const target = await db.getTarget(targetId)
 
     if (!target) {
-      return res.status(400).send({ message: 'Target bestaat niet.' })
+      return res.status(400).send({ error: 'Target bestaat niet.' })
     }
 
     const endTime = new Date(target.end_time)
@@ -29,7 +29,7 @@ export const register = (app, db, rabbitMq) => {
     if (endTime <= now) {
       return res
         .status(410)
-        .send({ message: 'De tijd voor dit target is verstreken.' })
+        .send({ error: 'De tijd voor dit target is verstreken.' })
     }
 
     const uuid = uuidv4()
@@ -61,7 +61,7 @@ export const register = (app, db, rabbitMq) => {
       console.error('Error bij het opslaan van de afbeelding:', error)
       res
         .status(500)
-        .send('Fout bij het opslaan van de afbeelding in de database.')
+        .send({ error: 'Fout bij opslaan van afbeelding' })
     }
   })
 }

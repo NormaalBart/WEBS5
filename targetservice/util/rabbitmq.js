@@ -31,6 +31,9 @@ export class RabbitMQUtil {
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)
     const routesPath = path.join(__dirname, '../listeners')
+    if (!fs.existsSync(routesPath)) {
+      return
+    }
     fs.readdirSync(routesPath).forEach(async file => {
       if (file.endsWith('.js')) {
         const route = await import(`../listeners/${file}`)

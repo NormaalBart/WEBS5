@@ -13,6 +13,11 @@ const SERVICES = {
     requireAuth: true,
     excludeRoutes: []
   },
+  '/targets/:target/timing': {
+    url: process.env.TIMING_SERVICE,
+    requireAuth: true,
+    excludeRoutes: []
+  },
   '/targets/:target/scores': {
     url: process.env.SCORE_SERVICE,
     requireAuth: true,
@@ -100,7 +105,9 @@ function proxyWithBreaker (route, target) {
     try {
       await breaker.fire(req, res, next)
     } catch (err) {
-      res.status(503).send('De service is tijdelijk niet beschikbaar.')
+      res
+        .status(503)
+        .send({ error: 'De service is tijdelijk niet beschikbaar.' })
     }
   }
 }

@@ -16,6 +16,7 @@ services:
       AUTH_SERVICE: ${AUTH_SERVICE}
       TARGET_SERVICE: ${TARGET_SERVICE}
       SCORE_SERVICE: ${SCORE_SERVICE}
+      TIMING_SERVICE: ${TIMING_SERVICE}
     restart: always
   imageservice:
     build:
@@ -174,6 +175,40 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  timingservice:
+    build:
+      context: ./timingservice
+      dockerfile: /Dockerfile
+    volumes:
+      - ./timingservice:/app
+    depends_on:
+      timingservice:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      PORT: ${EXPRESS_PORT}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_SCORE_CHANNEL: ${RABBITMQ_SCORE_CHANNEL}
+      DATABASE_URL: ${SCORE_SERVICE_DB}
+      RABBITMQ_CREATE_CHANNEL: ${RABBITMQ_CREATE_CHANNEL}
+      RABBITMQ_DELETE_CHANNEL: ${RABBITMQ_DELETE_CHANNEL}
+    restart: always
+  timingservicedb:
+    image: postgres:16
+    volumes:
+      - ./data/timingservice:/var/lib/postgresql/data
+      - ./databasescripts/timingservice.sql:/docker-entrypoint-initdb.d/init-db.sql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   mailhog:
     image: mailhog/mailhog
     environment:
@@ -201,6 +236,6 @@ services:
     restart: always
     healthcheck:
       test: rabbitmq-diagnostics -q ping
-      interval: 15s
+      interval: 20s
       timeout: 5s
       retries: 5

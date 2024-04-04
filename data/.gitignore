@@ -3,3 +3,4 @@ imageservice/**
 targetservice/**
 mailhog/**
 scoreservice/**
+timingservice/**

@@ -15,12 +15,12 @@ export const register = (app, db) => {
       const imagePath = await db.getImagePath(imageId, target)
 
       if (!imagePath) {
-        return res.status(404).send('Afbeelding niet gevonden.')
+        return res.status(404).send({ error: 'Afbeelding niet gevonden.' })
       }
       const absolutePath = path.resolve(imagePath)
       res.sendFile(absolutePath)
     } catch (error) {
-      res.status(500).send('Interne serverfout.')
+      res.status(500).send({ error: 'Interne serverfout' })
     }
   })
 }
