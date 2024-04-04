@@ -55,14 +55,18 @@ export const register = (app, db, rabbitMq) => {
       )
       res.status(201).send({ id })
 
-      const data = {
+      rabbitMq.sendToQueue(process.env.RABBITMQ_TARGET_IMAGE_CHANNEL, {
         ownerId,
         uuid,
         targetId: id,
         imagePath: filePath
-      }
-
-      rabbitMq.sendToQueue(process.env.RABBITMQ_TARGET_IMAGE_CHANNEL, data)
+      })
+      rabbitMq.sendToQueue(process.env.RABBITMQ_SCORE_CHANNEL, {
+        targetId: id,
+        ownerId,
+        uuid,
+        filePath
+      })
     } catch (error) {
       console.error('Fout bij het aanmaken van de target:', error)
       res.status(500).send({ error: 'Interne serverfout' })

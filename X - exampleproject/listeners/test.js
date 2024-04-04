@@ -1,6 +1,7 @@
 export const register = async (connection, database) => {
   const channel = await connection.createChannel()
 
+  /*
   await channel.assertQueue(process.env.RABBITMQ_TARGET_IMAGE_CHANNEL, {
     durable: false
   })
@@ -15,7 +16,8 @@ export const register = async (connection, database) => {
     )
 
     database.saveImagePath(uuid, imagePath, targetId, ownerId)
-    
+
     channel.ack(msg)
   })
+  */
 }

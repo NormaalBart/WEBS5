@@ -15,6 +15,7 @@ services:
       IMAGE_SERVICE: ${IMAGE_SERVICE}
       AUTH_SERVICE: ${AUTH_SERVICE}
       TARGET_SERVICE: ${TARGET_SERVICE}
+      SCORE_SERVICE: ${SCORE_SERVICE}
     restart: always
   imageservice:
     build:
@@ -32,6 +33,7 @@ services:
       RABBITMQ_URL: ${RABBITMQ_URL}
       RABBITMQ_MAIL_CHANNEL: ${RABBITMQ_MAIL_CHANNEL}
       RABBITMQ_TARGET_IMAGE_CHANNEL: ${RABBITMQ_TARGET_IMAGE_CHANNEL}
+      RABBITMQ_SCORE_CHANNEL: ${RABBITMQ_SCORE_CHANNEL}
     restart: always
   imageservicedb:
     image: postgres:16
@@ -83,6 +85,7 @@ services:
       PORT: ${EXPRESS_PORT}
       RABBITMQ_URL: ${RABBITMQ_URL}
       RABBITMQ_TARGET_IMAGE_CHANNEL: ${RABBITMQ_TARGET_IMAGE_CHANNEL}
+      RABBITMQ_SCORE_CHANNEL: ${RABBITMQ_SCORE_CHANNEL}
     restart: always
   targetservicedb:
     image: postgres:16
@@ -107,6 +110,20 @@ services:
       MAIL_HOG: ${MAIL_SERVER}
       RABBITMQ_MAIL_CHANNEL: ${RABBITMQ_MAIL_CHANNEL}
       RABBITMQ_URL: ${RABBITMQ_URL}
+  scoreservice:
+    build:
+      context: ./scoreservice
+      dockerfile: /Dockerfile
+    volumes:
+      - ./scoreservice:/app
+      - ./data/images:/app/images
+    depends_on:
+      - rabbitmq
+    environment:
+      PORT: ${EXPRESS_PORT}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_SCORE_CHANNEL: ${RABBITMQ_SCORE_CHANNEL}
+    restart: always
   mailhog:
     image: mailhog/mailhog
     environment:

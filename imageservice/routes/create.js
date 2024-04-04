@@ -33,6 +33,12 @@ export const register = (app, db, rabbitMq) => {
           target
         }
       })
+      rabbitMq.sendToQueue(process.env.RABBITMQ_SCORE_CHANNEL, {
+        targetId: target,
+        ownerId,
+        uuid,
+        filePath
+      })
     } catch (error) {
       console.error('Error bij het opslaan van de afbeelding:', error)
       res

@@ -3,6 +3,11 @@ import CircuitBreaker from 'opossum'
 import { verify } from '../util/verify.js'
 
 const SERVICES = {
+  '/targets/:target/images/:id/scores': {
+    url: process.env.SCORE_SERVICE,
+    requireAuth: true,
+    excludeRoutes: []
+  },
   '/targets/:target/images': {
     url: process.env.IMAGE_SERVICE,
     requireAuth: true,
