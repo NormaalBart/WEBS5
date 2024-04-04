@@ -119,10 +119,24 @@ services:
       - ./data/images:/app/images
     depends_on:
       - rabbitmq
+      - scoreservicedb
     environment:
       PORT: ${EXPRESS_PORT}
       RABBITMQ_URL: ${RABBITMQ_URL}
       RABBITMQ_SCORE_CHANNEL: ${RABBITMQ_SCORE_CHANNEL}
+      DATABASE_URL: ${SCORE_SERVICE_DB}
+      IMAGGA_USERNAME: ${IMAGGA_USERNAME}
+      IMAGGA_PASSWORD: ${IMAGGA_PASSWORD}
+    restart: always
+  scoreservicedb:
+    image: postgres:16
+    volumes:
+      - ./data/scoreservice:/var/lib/postgresql/data
+      - ./databasescripts/scoreservice.sql:/docker-entrypoint-initdb.d/init-db.sql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     restart: always
   mailhog:
     image: mailhog/mailhog
