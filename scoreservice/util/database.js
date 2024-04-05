@@ -88,4 +88,10 @@ export class Database {
     const res = await this.query(checkQuery, [id])
     return res.rows[0]
   }
+
+  async getScoresOrderByScore (targetId) {
+    const resultsQuery = 'SELECT * FROM image_results WHERE target_id = $1 ORDER BY score DESC'
+    const resultsRes = await this.query(resultsQuery, [targetId])
+    return resultsRes.rows
+  }
 }

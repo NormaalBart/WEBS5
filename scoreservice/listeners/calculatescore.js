@@ -2,7 +2,7 @@ import axios from 'axios'
 import FormData from 'form-data'
 import fs from 'fs'
 
-export const register = async (connection, database) => {
+export const register = async (connection, database, rabbitMq) => {
   const channel = await connection.createChannel()
 
   await channel.assertQueue(process.env.RABBITMQ_SCORE_CHANNEL, {
@@ -20,18 +20,32 @@ export const register = async (connection, database) => {
       const { targetId, ownerId, uuid, filePath, originalFile } = json.data
       scoreImage(database, targetId, ownerId, uuid, filePath, originalFile)
     } else if (json.type === 'finish') {
-      finishTarget(database, json.data.targetId)
+      finishTarget(rabbitMq, database, json.data.targetId)
     } else {
       console.log(`unknown scoring type ${json.type}`)
       return
     }
-
     channel.ack(msg)
   })
 }
 
-function finishTarget (database, targetId) {
-  console.log(`finishing ${targetId}`)
+async function finishTarget (rabbitMq, database, targetId) {
+  const scores = await database.getScoresOrderByScore(targetId)
+  let winner = true
+  for (const key in scores) {
+    const imageScore = scores[key]
+    rabbitMq.sendToQueue(process.env.RABBITMQ_MAIL_CHANNEL, {
+      template: 'result-' + winner,
+      subject: 'Resultaat target ' + targetId,
+      ownerId: imageScore.owner_id,
+      data: {
+        winner,
+        score: imageScore.score,
+        target: targetId
+      }
+    })
+    winner = false
+  }
 }
 
 function scoreImage (database, targetId, ownerId, uuid, filePath, originalFile) {

@@ -34,7 +34,7 @@ export class RabbitMQUtil {
     fs.readdirSync(routesPath).forEach(async file => {
       if (file.endsWith('.js')) {
         const route = await import(`../listeners/${file}`)
-        route.register(this.connection, database)
+        route.register(this.connection, database, this)
       }
     })
   }
