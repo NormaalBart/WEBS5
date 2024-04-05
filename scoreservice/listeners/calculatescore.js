@@ -44,6 +44,13 @@ async function finishTarget (rabbitMq, database, targetId) {
         target: targetId
       }
     })
+
+    if (winner) {
+      rabbitMq.sendToQueue(process.env.RABBITMQ_ANNOUNCE_WINNAR_CHANNEL, {
+        targetId,
+        winner: imageScore.owner_id
+      })
+    }
     winner = false
   }
 }

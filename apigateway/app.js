@@ -8,6 +8,14 @@ const PORT = process.env.PORT || 3000
 
 registerRoutes(app)
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+const swaggerOptions = {
+  explorer: true,
+}
+
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, swaggerOptions)
+)
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

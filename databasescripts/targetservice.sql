@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS targets (
   latitude NUMERIC(10, 7) NOT NULL,
   owner_id INTEGER NOT NULL,
   end_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-  image_path VARCHAR(255) NOT NULL
+  image_path VARCHAR(255) NOT NULL,
+  winner VARCHAR(255)
 );

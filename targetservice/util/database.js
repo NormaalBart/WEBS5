@@ -13,7 +13,14 @@ export class Database {
     return res
   }
 
-  async createTarget (name, longitude, latitude, ownerId, endTimeDate, filePath) {
+  async createTarget (
+    name,
+    longitude,
+    latitude,
+    ownerId,
+    endTimeDate,
+    filePath
+  ) {
     const text =
       'INSERT INTO targets(name, longitude, latitude, owner_id, end_time, image_path) VALUES($1, $2, $3, $4, $5, $6) RETURNING id'
     const params = [
@@ -26,6 +33,11 @@ export class Database {
     ]
     const res = await this.query(text, params)
     return res.rows[0].id
+  }
+
+  async updateTarget (targetId, winner) {
+    const checkQuery = 'UPDATE targets SET winner = $1 WHERE id = $2'
+    await this.query(checkQuery, [winner, targetId])
   }
 
   async deleteTarget (targetId, ownerId) {
