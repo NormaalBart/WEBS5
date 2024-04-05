@@ -22,15 +22,19 @@ export class RabbitMQUtil {
     this.channel.sendToQueue(channel, Buffer.from(JSON.stringify(data)))
   }
 
-  loadListeners (database) {
+  async loadListeners (database) {
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)
     const routesPath = path.join(__dirname, '../listeners')
-    fs.readdirSync(routesPath).forEach(async file => {
-      if (file.endsWith('.js')) {
+    const files = fs.readdirSync(routesPath)
+
+    const imports = files
+      .filter(file => file.endsWith('.js'))
+      .map(async file => {
         const route = await import(`../listeners/${file}`)
-        route.register(this.connection, database)
-      }
-    })
+        route.register(this.connection, database, this)
+      })
+
+    await Promise.all(imports)
   }
 }

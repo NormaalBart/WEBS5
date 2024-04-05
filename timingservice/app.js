@@ -2,6 +2,7 @@ import express from 'express'
 import { Database } from './util/database.js'
 import { loadRoutes } from './util/autoregister.js'
 import { RabbitMQUtil } from './util/rabbitmq.js'
+import { checkAndExecuteTargets } from './util/timer.js'
 
 const app = express()
 const db = new Database()
@@ -20,3 +21,5 @@ loadRoutes(app, db, rabbitMq)
 app.listen(port, () => {
   console.log(`Server luistert op poort ${port}`)
 })
+
+checkAndExecuteTargets(db, rabbitMq)

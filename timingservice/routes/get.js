@@ -3,9 +3,9 @@ export const register = (app, db) => {
     const { targetId } = req.params
 
     try {
-      const target = await db.getTarget(id)
+      const target = await db.getTarget(targetId)
       if (target) {
-        res.status(200).send(target)
+        res.status(200).send({ end_time: new Date(target.end_time).getTime() })
       } else {
         res.status(404).send({ error: 'Target niet gevonden.' })
       }

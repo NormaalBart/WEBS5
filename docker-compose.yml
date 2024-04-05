@@ -182,7 +182,7 @@ services:
     volumes:
       - ./timingservice:/app
     depends_on:
-      timingservice:
+      timingservicedb:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -190,7 +190,7 @@ services:
       PORT: ${EXPRESS_PORT}
       RABBITMQ_URL: ${RABBITMQ_URL}
       RABBITMQ_SCORE_CHANNEL: ${RABBITMQ_SCORE_CHANNEL}
-      DATABASE_URL: ${SCORE_SERVICE_DB}
+      DATABASE_URL: ${TIMING_SERVICE_DB}
       RABBITMQ_CREATE_CHANNEL: ${RABBITMQ_CREATE_CHANNEL}
       RABBITMQ_DELETE_CHANNEL: ${RABBITMQ_DELETE_CHANNEL}
     restart: always

@@ -1,4 +1,6 @@
-export const register = async (connection, database) => {
+import { scheduleAction } from '../util/timer.js'
+
+export const register = async (connection, database, rabbitMq) => {
   const channel = await connection.createChannel()
 
   await channel.assertExchange(process.env.RABBITMQ_CREATE_CHANNEL, 'fanout', {
@@ -16,12 +18,9 @@ export const register = async (connection, database) => {
     msg => {
       if (msg.content) {
         const json = JSON.parse(msg.content.toString())
-        console.log(json)
         if (json.type === 'target') {
-          database.createTarget(
-            json.id,
-            json.endTimeDate,
-          )
+          database.createTarget(json.id, json.endTimeDate)
+          scheduleAction(json, json.endTimeDate, database, rabbitMq)
         }
       }
     },

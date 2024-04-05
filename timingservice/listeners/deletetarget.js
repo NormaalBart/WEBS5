@@ -18,7 +18,6 @@ export const register = async (connection, database) => {
         const json = JSON.parse(msg.content.toString())
         if (json.type === 'target') {
           database.deleteTarget(json.id)
-          database.deleteImages(json.id)
         }
       }
     },

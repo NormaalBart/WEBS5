@@ -14,55 +14,69 @@ export const register = async (connection, database) => {
       return
     }
 
-    const { targetId, ownerId, uuid, filePath, originalFile } = JSON.parse(
-      msg.content.toString()
-    )
-
-    const form = new FormData()
-    form.append('image', fs.createReadStream(filePath))
-
-    const auth = {
-      username: process.env.IMAGGA_USERNAME,
-      password: process.env.IMAGGA_PASSWORD
+    const json = JSON.parse(msg.content.toString())
+    console.log(json)
+    if (json.type === 'score') {
+      const { targetId, ownerId, uuid, filePath, originalFile } = json.data
+      scoreImage(database, targetId, ownerId, uuid, filePath, originalFile)
+    } else if (json.type === 'finish') {
+      finishTarget(database, json.data.targetId)
+    } else {
+      console.log(`unknown scoring type ${json.type}`)
+      return
     }
-
-    axios
-      .post('https://api.imagga.com/v2/tags', form, {
-        headers: {
-          ...form.getHeaders(),
-          Authorization: `Basic ${Buffer.from(
-            `${auth.username}:${auth.password}`
-          ).toString('base64')}`
-        }
-      })
-      .then(async response => {
-        const jsonResponse = JSON.parse(JSON.stringify(response.data))
-        if (!(await database.getTarget(targetId))) {
-          return
-        }
-        if (originalFile) {
-          database.createScore(
-            targetId,
-            ownerId,
-            uuid,
-            JSON.stringify(jsonResponse.result.tags)
-          )
-        } else {
-          const originalScore = await database.getOriginalScore(targetId)
-          const tags = JSON.parse(JSON.stringify(originalScore))
-          const confidenceScore = calculateTagsConfidenceScore(
-            tags,
-            jsonResponse.result.tags
-          )
-          database.insertImageResult(targetId, uuid, ownerId, confidenceScore)
-        }
-      })
-      .catch(error => {
-        console.error('Er is een fout opgetreden:', error)
-      })
 
     channel.ack(msg)
   })
+}
+
+function finishTarget (database, targetId) {
+  console.log(`finishing ${targetId}`)
+}
+
+function scoreImage (database, targetId, ownerId, uuid, filePath, originalFile) {
+  const form = new FormData()
+  form.append('image', fs.createReadStream(filePath))
+
+  const auth = {
+    username: process.env.IMAGGA_USERNAME,
+    password: process.env.IMAGGA_PASSWORD
+  }
+
+  axios
+    .post('https://api.imagga.com/v2/tags', form, {
+      headers: {
+        ...form.getHeaders(),
+        Authorization: `Basic ${Buffer.from(
+          `${auth.username}:${auth.password}`
+        ).toString('base64')}`
+      }
+    })
+    .then(async response => {
+      const jsonResponse = JSON.parse(JSON.stringify(response.data))
+      if (!(await database.getTarget(targetId))) {
+        return
+      }
+      if (originalFile) {
+        database.createScore(
+          targetId,
+          ownerId,
+          uuid,
+          JSON.stringify(jsonResponse.result.tags)
+        )
+      } else {
+        const originalScore = await database.getOriginalScore(targetId)
+        const tags = JSON.parse(JSON.stringify(originalScore))
+        const confidenceScore = calculateTagsConfidenceScore(
+          tags,
+          jsonResponse.result.tags
+        )
+        database.insertImageResult(targetId, uuid, ownerId, confidenceScore)
+      }
+    })
+    .catch(error => {
+      console.error('Er is een fout opgetreden:', error)
+    })
 }
 
 function calculateTagsConfidenceScore (tagsA, tagsB) {

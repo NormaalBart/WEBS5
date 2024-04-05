@@ -33,6 +33,12 @@ export const register = (app, db, rabbitMq) => {
       })
     }
 
+    if (isEndTimeMoreThan7DaysAway(endTimeDate)) {
+      return res.status(400).send({
+        error: 'Eindtijd mag niet meer dan 7 dagen in toekomst zijn.'
+      })
+    }
+
     if (endTimeDate.getTime() <= Date.now()) {
       return res
         .status(400)
@@ -62,11 +68,14 @@ export const register = (app, db, rabbitMq) => {
         imagePath: filePath
       })
       rabbitMq.sendToQueue(process.env.RABBITMQ_SCORE_CHANNEL, {
-        targetId: id,
-        ownerId,
-        uuid,
-        filePath,
-        originalFile: true
+        type: 'score',
+        data: {
+          targetId: id,
+          ownerId,
+          uuid,
+          filePath,
+          originalFile: true
+        }
       })
       rabbitMq.broadcast(process.env.RABBITMQ_CREATE_CHANNEL, {
         type: 'target',
@@ -80,4 +89,13 @@ export const register = (app, db, rabbitMq) => {
       res.status(500).send({ error: 'Interne serverfout' })
     }
   })
+}
+
+function isEndTimeMoreThan7DaysAway (endTime) {
+  const now = new Date()
+  const sevenDaysInMilliseconds = 7 * 24 * 60 * 60 * 1000
+
+  const difference = endTime.getTime() - now.getTime()
+
+  return difference > sevenDaysInMilliseconds
 }

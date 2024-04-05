@@ -16,10 +16,7 @@ export class Database {
   async createTarget (id, endTimeDate) {
     const insertQuery =
       'INSERT INTO targets(id, end_time) VALUES($1, $2) RETURNING id'
-    const res = await this.query(insertQuery, [
-      id,
-      endTimeDate,
-    ])
+    const res = await this.query(insertQuery, [id, endTimeDate])
     return res.rows[0].id
   }
 
@@ -31,7 +28,12 @@ export class Database {
   async getTarget (id) {
     const checkQuery = 'SELECT * FROM targets WHERE id = $1'
     const res = await this.query(checkQuery, [id])
-    const target = res.rows.map(this.convertEndTimeToMilliseconds)[0]
     return res.rows[0]
+  }
+
+  async getTargets () {
+    const checkQuery = 'SELECT * FROM targets'
+    const res = await this.query(checkQuery)
+    return res.rows
   }
 }
