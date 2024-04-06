@@ -4,7 +4,7 @@ export const register = (app, db, rabbitMq) => {
     const ownerId = req.headers.authdata.userId
 
     try {
-      const { rowCount, ownerMatch } = await db.deleteTarget(id, ownerId)
+      const { rowCount, ownerMatch } = await db.deleteTarget(id, ownerId, req.headers.authdata.role)
       if (rowCount === 0) {
         return res.status(404).send({ error: 'Target niet gevonden.' })
       }

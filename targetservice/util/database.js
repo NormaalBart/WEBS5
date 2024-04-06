@@ -40,13 +40,13 @@ export class Database {
     await this.query(checkQuery, [winner, targetId])
   }
 
-  async deleteTarget (targetId, ownerId) {
+  async deleteTarget (targetId, ownerId, role) {
     const checkQuery = 'SELECT owner_id FROM targets WHERE id = $1'
     const checkRes = await this.query(checkQuery, [targetId])
     if (checkRes.rowCount === 0) {
       return { rowCount: 0, ownerMatch: false }
     }
-    if (checkRes.rows[0].owner_id !== ownerId) {
+    if (checkRes.rows[0].owner_id !== ownerId && role !== 'admin') {
       return { rowCount: 1, ownerMatch: false }
     }
 

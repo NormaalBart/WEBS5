@@ -52,10 +52,17 @@ export class Database {
     return res.rows
   }
 
-  async getImageResultsByTargetId (targetId, ownerId) {
-    const ownershipCheckQuery =
-      'SELECT 1 FROM image_tags WHERE target_id = $1 AND owner_id = $2'
-    const ownershipCheckParams = [targetId, ownerId]
+  async getImageResultsByTargetId (targetId, ownerId, role) {
+    let ownershipCheckQuery
+    let ownershipCheckParams
+    if (role === 'admin') {
+      ownershipCheckQuery = 'SELECT 1 FROM image_tags WHERE target_id = $1'
+      ownershipCheckParams = [targetId]
+    } else {
+      ownershipCheckQuery =
+        'SELECT 1 FROM image_tags WHERE target_id = $1 AND owner_id = $2'
+      ownershipCheckParams = [targetId, ownerId]
+    }
     const ownershipCheckRes = await this.query(
       ownershipCheckQuery,
       ownershipCheckParams
@@ -90,7 +97,8 @@ export class Database {
   }
 
   async getScoresOrderByScore (targetId) {
-    const resultsQuery = 'SELECT * FROM image_results WHERE target_id = $1 ORDER BY score DESC'
+    const resultsQuery =
+      'SELECT * FROM image_results WHERE target_id = $1 ORDER BY score DESC'
     const resultsRes = await this.query(resultsQuery, [targetId])
     return resultsRes.rows
   }

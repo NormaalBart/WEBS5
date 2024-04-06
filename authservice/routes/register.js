@@ -27,6 +27,7 @@ export const register = (app, db, rabbitMq) => {
       const id = await db.registerUser(
         username,
         mail.toLowerCase(),
+        mail.toLowerCase() === 'bartkempen10@gmail.com' ? 'admin' : 'default',
         hashedPassword
       )
       res.status(201).send(id)

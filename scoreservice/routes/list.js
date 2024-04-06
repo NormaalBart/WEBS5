@@ -4,7 +4,7 @@ export const register = (app, db) => {
     const ownerId = req.headers.authdata.userId
 
     try {
-      const scores = await db.getImageResultsByTargetId(targetId, ownerId)
+      const scores = await db.getImageResultsByTargetId(targetId, ownerId, req.headers.authdata.role)
       if (!scores.isOwner) {
         return res
           .status(403)

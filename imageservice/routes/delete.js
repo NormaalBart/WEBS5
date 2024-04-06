@@ -14,21 +14,25 @@ export const register = (app, db, rabbitMq) => {
     }
 
     try {
-      const { rowCount, ownerMatch, targetMatch } = await db.canDeleteImage(
-        imageId,
-        target,
-        ownerId
-      )
-      if (rowCount === 0) {
-        return res.status(404).send({ error: 'Afbeelding niet gevonden.' })
-      }
-      if (!targetMatch) {
-        return res.status(403).send({ error: 'Target niet gevonden bij foto' })
-      }
-      if (!ownerMatch) {
-        return res.status(403).send({
-          error: 'Geen toestemming om deze afbeelding te verwijderen.'
-        })
+      if (req.headers.authdata.role !== 'admin') {
+        const { rowCount, ownerMatch, targetMatch } = await db.canDeleteImage(
+          imageId,
+          target,
+          ownerId
+        )
+        if (rowCount === 0) {
+          return res.status(404).send({ error: 'Afbeelding niet gevonden.' })
+        }
+        if (!targetMatch) {
+          return res
+            .status(403)
+            .send({ error: 'Target niet gevonden bij foto' })
+        }
+        if (!ownerMatch) {
+          return res.status(403).send({
+            error: 'Geen toestemming om deze afbeelding te verwijderen.'
+          })
+        }
       }
 
       const imagePath = await db.deleteImage(imageId)

@@ -20,10 +20,10 @@ export class Database {
     return res.rows.length > 0
   }
 
-  async registerUser (username, mail, hashedPassword) {
+  async registerUser (username, mail, role, hashedPassword) {
     const res = await this.query(
-      'INSERT INTO users (username, mail, password) VALUES ($1, $2, $3) RETURNING id',
-      [username, mail, hashedPassword]
+      'INSERT INTO users (username, mail, password, role) VALUES ($1, $2, $3, $4) RETURNING id',
+      [username, mail, hashedPassword, role]
     )
     return res.rows[0]
   }
